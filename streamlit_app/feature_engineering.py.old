@@ -1,0 +1,407 @@
+"""
+Feature Engineering for ATM Cash Demand Prediction
+FILE LOCATION: ZIG018/streamlit_app/feature_engineering.py
+
+Handles all feature creation and data preparation for the model.
+"""
+
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+import warnings
+warnings.filterwarnings('ignore')
+
+
+class ATMFeatureEngineer:
+    """
+    Feature engineering for ATM cash demand prediction.
+    Creates all required features from raw transaction data.
+    """
+    
+    def __init__(self):
+        # Model expects these 13 numeric features IN THIS EXACT ORDER
+        self.numeric_features = [
+            'Total_Withdrawals', 
+            'Total_Deposits', 
+            'Holiday_Flag',
+            'Year', 
+            'Month', 
+            'Day', 
+            'Lag_1', 
+            'Lag_7', 
+            'RollingMean_3', 
+            'RollingMean_7', 
+            'Quarter', 
+            'Month_Sin', 
+            'Month_Cos'
+        ]
+        
+        # Categorical features for reference
+        self.categorical_features = [
+            'ATM_ID', 
+            'Date', 
+            'Day_of_Week', 
+            'Location_Type', 
+            'Weather_Condition'
+        ]
+        
+        # Column name mapping (from various input formats to standard names)
+        self.column_mapping = {
+            'Withdrawals': 'Total_Withdrawals',
+            'withdrawals': 'Total_Withdrawals',
+            'Deposits': 'Total_Deposits',
+            'deposits': 'Total_Deposits',
+            'Location': 'Location_Type',
+            'location': 'Location_Type',
+            'DayOfWeek': 'Day_of_Week',
+            'day_of_week': 'Day_of_Week',
+            'Weather': 'Weather_Condition',
+            'weather': 'Weather_Condition',
+            'WeatherCondition': 'Weather_Condition',
+        }
+    
+    def map_column_names(self, df):
+        """
+        Map various input column names to standard names.
+        """
+        df = df.copy()
+        
+        print("\n🔄 Mapping column names...")
+        for old_name, new_name in self.column_mapping.items():
+            if old_name in df.columns and new_name not in df.columns:
+                df.rename(columns={old_name: new_name}, inplace=True)
+                print(f"   ✓ '{old_name}' → '{new_name}'")
+        
+        return df
+    
+    def validate_input(self, df):
+        """
+        Validate input data and provide feedback.
+        """
+        issues = []
+        suggestions = []
+        
+        print("\n" + "="*60)
+        print("📋 INPUT DATA VALIDATION")
+        print("="*60)
+        
+        # Critical checks
+        if 'Date' not in df.columns:
+            issues.append("❌ CRITICAL: Missing 'Date' column")
+        else:
+            print("✓ 'Date' column found")
+            try:
+                pd.to_datetime(df['Date'])
+                print("✓ 'Date' format is valid")
+            except:
+                issues.append("❌ 'Date' column contains invalid dates")
+        
+        if 'ATM_ID' not in df.columns:
+            suggestions.append("⚠️ 'ATM_ID' missing - will use default 'ATM_001'")
+        else:
+            print(f"✓ 'ATM_ID' found ({df['ATM_ID'].nunique()} unique ATMs)")
+        
+        # Transaction data checks
+        has_withdrawals = 'Total_Withdrawals' in df.columns or 'Withdrawals' in df.columns
+        has_deposits = 'Total_Deposits' in df.columns or 'Deposits' in df.columns
+        
+        if not has_withdrawals:
+            suggestions.append("⚠️ No withdrawal data - will use historical average")
+        else:
+            print("✓ Withdrawal data found")
+            
+        if not has_deposits:
+            suggestions.append("⚠️ No deposit data - will use default values")
+        else:
+            print("✓ Deposit data found")
+        
+        # Optional fields
+        if 'Location_Type' not in df.columns and 'Location' not in df.columns:
+            suggestions.append("ℹ️ No location data - will default to 'Urban'")
+        
+        if 'Weather_Condition' not in df.columns and 'Weather' not in df.columns:
+            suggestions.append("ℹ️ No weather data - will default to 'Clear'")
+        
+        print("="*60)
+        
+        return issues, suggestions
+    
+    def create_temporal_features(self, df):
+        """
+        Create time-based features from Date column.
+        """
+        df = df.copy()
+        
+        print("\n⏰ Creating temporal features...")
+        
+        # Ensure Date is datetime
+        if 'Date' not in df.columns:
+            df['Date'] = pd.Timestamp.now()
+            print("   ⚠️ No Date column - using current date")
+        else:
+            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+        
+        # Extract basic time components
+        df['Year'] = df['Date'].dt.year
+        df['Month'] = df['Date'].dt.month
+        df['Day'] = df['Date'].dt.day
+        df['Quarter'] = df['Date'].dt.quarter
+        
+        # Day of week
+        if 'Day_of_Week' not in df.columns:
+            df['Day_of_Week'] = df['Date'].dt.day_name()
+        
+        # Handle numeric day of week (0-6)
+        if 'DayOfWeek' in df.columns and df['DayOfWeek'].dtype in ['int64', 'float64']:
+            day_mapping = {
+                0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 
+                3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'
+            }
+            df['Day_of_Week'] = df['DayOfWeek'].map(day_mapping).fillna('Monday')
+            print("   ✓ Converted numeric DayOfWeek to day names")
+        
+        # Cyclical encoding for Month (important for seasonality)
+        df['Month_Sin'] = np.sin(2 * np.pi * df['Month'] / 12)
+        df['Month_Cos'] = np.cos(2 * np.pi * df['Month'] / 12)
+        
+        print("   ✓ Created: Year, Month, Day, Quarter, Day_of_Week, Month_Sin, Month_Cos")
+        
+        return df
+    
+    def create_lag_features(self, df):
+        """
+        Create lag and rolling window features.
+        These capture recent trends in cash demand.
+        """
+        df = df.copy()
+        
+        print("\n📊 Creating lag and rolling features...")
+        
+        # Sort by Date (and ATM_ID if available)
+        sort_cols = ['Date']
+        if 'ATM_ID' in df.columns:
+            sort_cols.insert(0, 'ATM_ID')
+        
+        df = df.sort_values(sort_cols).reset_index(drop=True)
+        
+        # Ensure Total_Withdrawals exists
+        if 'Total_Withdrawals' not in df.columns:
+            if 'Withdrawals' in df.columns:
+                df['Total_Withdrawals'] = df['Withdrawals']
+            else:
+                df['Total_Withdrawals'] = 5000  # Default value
+                print("   ⚠️ Using default withdrawal value (5000)")
+        
+        # Create lag features grouped by ATM if ATM_ID exists
+        if 'ATM_ID' in df.columns:
+            print("   ✓ Creating ATM-specific lag features...")
+            df['Lag_1'] = df.groupby('ATM_ID')['Total_Withdrawals'].shift(1)
+            df['Lag_7'] = df.groupby('ATM_ID')['Total_Withdrawals'].shift(7)
+            df['RollingMean_3'] = df.groupby('ATM_ID')['Total_Withdrawals'].transform(
+                lambda x: x.rolling(window=3, min_periods=1).mean()
+            )
+            df['RollingMean_7'] = df.groupby('ATM_ID')['Total_Withdrawals'].transform(
+                lambda x: x.rolling(window=7, min_periods=1).mean()
+            )
+        else:
+            print("   ✓ Creating global lag features...")
+            df['Lag_1'] = df['Total_Withdrawals'].shift(1)
+            df['Lag_7'] = df['Total_Withdrawals'].shift(7)
+            df['RollingMean_3'] = df['Total_Withdrawals'].rolling(window=3, min_periods=1).mean()
+            df['RollingMean_7'] = df['Total_Withdrawals'].rolling(window=7, min_periods=1).mean()
+        
+        # Fill NaN values in lag features with current value or mean
+        for col in ['Lag_1', 'Lag_7', 'RollingMean_3', 'RollingMean_7']:
+            if col in df.columns:
+                # For first rows without lags, use current value or mean
+                mean_val = df['Total_Withdrawals'].mean()
+                df[col].fillna(mean_val, inplace=True)
+        
+        print("   ✓ Created: Lag_1, Lag_7, RollingMean_3, RollingMean_7")
+        
+        return df
+    
+    def fill_missing_features(self, df):
+        """
+        Fill missing features with intelligent defaults.
+        """
+        df = df.copy()
+        
+        print("\n🔧 Filling missing features...")
+        
+        # Numeric features
+        if 'Total_Withdrawals' not in df.columns:
+            df['Total_Withdrawals'] = 5000
+            print("   ➕ Total_Withdrawals = 5000 (default)")
+        
+        if 'Total_Deposits' not in df.columns:
+            df['Total_Deposits'] = 2000
+            print("   ➕ Total_Deposits = 2000 (default)")
+        
+        # Categorical features
+        if 'ATM_ID' not in df.columns:
+            df['ATM_ID'] = 'ATM_001'
+            print("   ➕ ATM_ID = 'ATM_001' (default)")
+        
+        if 'Location_Type' not in df.columns:
+            df['Location_Type'] = 'Urban'
+            print("   ➕ Location_Type = 'Urban' (default)")
+        
+        if 'Weather_Condition' not in df.columns:
+            df['Weather_Condition'] = 'Clear'
+            print("   ➕ Weather_Condition = 'Clear' (default)")
+        
+        return df
+    
+    def engineer_all_features(self, df, atm_id=None):
+        """
+        Main pipeline: Create all features from raw data.
+        
+        Args:
+            df: Input DataFrame with raw ATM data
+            atm_id: Optional ATM_ID to filter for
+            
+        Returns:
+            Tuple of (processed_df, issues, suggestions)
+        """
+        print("\n" + "="*60)
+        print("🚀 FEATURE ENGINEERING PIPELINE")
+        print("="*60)
+        
+        # Step 1: Map column names
+        df = self.map_column_names(df)
+        
+        # Step 2: Validate input
+        issues, suggestions = self.validate_input(df)
+        
+        if issues:
+            print("\n❌ CRITICAL ISSUES FOUND:")
+            for issue in issues:
+                print(f"   {issue}")
+            return None, issues, suggestions
+        
+        # Step 3: Create temporal features
+        df = self.create_temporal_features(df)
+        
+        # Step 4: Fill missing features
+        df = self.fill_missing_features(df)
+        
+        # Step 5: Create lag features
+        df = self.create_lag_features(df)
+        
+        # Step 6: Filter by ATM_ID if specified
+        if atm_id is not None and 'ATM_ID' in df.columns:
+            original_len = len(df)
+            df = df[df['ATM_ID'] == atm_id].copy()
+            print(f"\n🔍 Filtered for ATM '{atm_id}': {len(df)} records (from {original_len})")
+        
+        # Step 7: Final validation - ensure all numeric features exist
+        for feature in self.numeric_features:
+            if feature not in df.columns:
+                print(f"   ⚠️ Missing feature '{feature}' - adding with default value 0")
+                df[feature] = 0.0
+        
+        print("\n" + "="*60)
+        print("✅ FEATURE ENGINEERING COMPLETE")
+        print(f"   Final shape: {df.shape}")
+        print(f"   Records: {len(df)}")
+        print(f"   Features: {len(df.columns)}")
+        print("="*60)
+        
+        return df, issues, suggestions
+    
+    def prepare_for_model(self, df):
+        """
+        Extract ONLY the numeric features in the exact order the model expects.
+        This is the final step before prediction.
+        
+        Returns:
+            DataFrame with exactly 12 numeric features in correct order
+        """
+        print("\n📦 Preparing features for model...")
+        
+        feature_df = pd.DataFrame()
+        
+        # Add features in exact order
+        for feature in self.numeric_features:
+            if feature in df.columns:
+                feature_df[feature] = df[feature].astype(float)
+            else:
+                feature_df[feature] = 0.0
+                print(f"   ⚠️ '{feature}' missing, using 0.0")
+        
+        print(f"\n✅ Model input ready: {feature_df.shape}")
+        print(f"   Features: {list(feature_df.columns)}")
+        
+        return feature_df
+    
+    def get_feature_info(self):
+        """
+        Get information about required features.
+        """
+        return {
+            'numeric': self.numeric_features,
+            'categorical': self.categorical_features,
+            'total': len(self.numeric_features) + len(self.categorical_features)
+        }
+
+
+# Test functionality
+if __name__ == "__main__":
+    print("\n" + "="*60)
+    print("🧪 TESTING FEATURE ENGINEERING")
+    print("="*60)
+    
+    # Create sample data similar to your CSV format
+    sample_data = pd.DataFrame({
+        'Date': ['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04', '2023-01-05',
+                 '2023-01-06', '2023-01-07', '2023-01-08'],
+        'ATM_ID': ['ATM_001', 'ATM_001', 'ATM_001', 'ATM_001', 'ATM_001',
+                   'ATM_001', 'ATM_001', 'ATM_001'],
+        'Withdrawals': [5000, 5500, 6000, 5800, 6200, 7000, 7500, 6800],
+        'Deposits': [2000, 2200, 2100, 2300, 2400, 2600, 2800, 2500],
+        'Location': ['Urban', 'Urban', 'Urban', 'Urban', 'Urban', 'Urban', 'Urban', 'Urban'],
+        'Weather': ['Clear', 'Clear', 'Rainy', 'Clear', 'Clear', 'Sunny', 'Clear', 'Rainy']
+    })
+    
+    print("\n📊 Sample Input Data:")
+    print(sample_data.to_string())
+    
+    # Initialize feature engineer
+    engineer = ATMFeatureEngineer()
+    
+    # Process data
+    result, issues, suggestions = engineer.engineer_all_features(sample_data, atm_id='ATM_001')
+    
+    if result is not None:
+        print("\n" + "="*60)
+        print("📊 PROCESSED DATA")
+        print("="*60)
+        print(f"Shape: {result.shape}")
+        print(f"\nColumns created: {len(result.columns)}")
+        print(f"{list(result.columns)}")
+        
+        # Prepare for model
+        model_input = engineer.prepare_for_model(result)
+        
+        print("\n" + "="*60)
+        print("🤖 MODEL INPUT (Final)")
+        print("="*60)
+        print(model_input.to_string())
+        print(f"\nShape: {model_input.shape}")
+        print(f"Features: {list(model_input.columns)}")
+        
+        if issues:
+            print("\n❌ Issues found:")
+            for issue in issues:
+                print(f"   {issue}")
+        
+        if suggestions:
+            print("\n💡 Suggestions:")
+            for suggestion in suggestions:
+                print(f"   {suggestion}")
+    else:
+        print("\n❌ Feature engineering failed!")
+        if issues:
+            for issue in issues:
+                print(f"   {issue}")

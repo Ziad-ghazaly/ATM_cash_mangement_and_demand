@@ -1,0 +1,9 @@
+Requirement already satisfied: numpy in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (1.23.5)
+Collecting numpy
+  Using cached numpy-2.2.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.8 MB)
+Installing collected packages: numpy
+  Attempting uninstall: numpy
+    Found existing installation: numpy 1.23.5
+    Uninstalling numpy-1.23.5:
+      Successfully uninstalled numpy-1.23.5
+Successfully installed numpy-2.2.6

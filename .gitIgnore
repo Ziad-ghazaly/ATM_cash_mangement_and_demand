@@ -1,0 +1,91 @@
+# ============================================
+# Git Ignore File
+# FILE: .gitignore (root)
+# ============================================
+
+# Environment Variables
+.env
+.env.*
+!.env.template
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+ENV/
+env/
+.venv
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Azure ML
+.azureml/
+.amlignore
+.amlignore.amltmp
+*.amltmp
+
+# Models (too large for git)
+*.pkl
+*.h5
+*.joblib
+*.model
+trained_model/*.pkl
+!trained_model/.gitkeep
+
+# Data Files (use DVC or Azure Blob instead)
+*.csv
+*.parquet
+*.xlsx
+*.json
+data/
+!data/.gitkeep
+
+# Logs
+*.log
+logs/
+*.out
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Docker
+docker-compose.override.yml
+
+# Streamlit
+.streamlit/secrets.toml
+.streamlit/config.toml
