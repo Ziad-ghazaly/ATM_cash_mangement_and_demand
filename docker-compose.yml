@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  rag_api:
+    build:
+      context: ./services/RAG_API
+      dockerfile: dockerfile
+    env_file:
+      - ./services/RAG_API/.env
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rag_net
+
+  streamlit_app:
+    build:
+      context: ./streamlit_app
+    # If your Dockerfile name is "DockerFile":
+      dockerfile: DockerFile
+    env_file:
+      - ./streamlit_app/.env
+    environment:
+      # ensure Streamlit can reach rag_api by service name
+      - RAG_API_BASE_URL=http://rag_api:8000
+    depends_on:
+      rag_api:
+        condition: service_healthy
+    ports:
+      - "8501:8501"
+    command: streamlit run app.py --server.address=0.0.0.0 --server.port=8501
+    networks:
+      - rag_net
+
+networks:
+  rag_net:
+    driver: bridge
