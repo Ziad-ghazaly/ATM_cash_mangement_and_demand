@@ -68,7 +68,7 @@ Azure subscription (for cloud services)
 Git
 8GB RAM minimum (16GB recommended for model training)
 Step 1: Clone Repository
-bashgit clone [https://github.com/yourusername/ATM_CASH_MANAGEMENT_AND_DEMAND](https://github.com/Ziad-ghazaly/ATM_cash_mangement_and_demand/).git
+bashgit clone [(https://github.com/Ziad-ghazaly/ATM_cash_mangement_and_demand/)].git
 cd ATM_CASH_MANAGEMENT_AND_DEMAND-1
 Step 2: Create Virtual Environment
 bash# Windows
