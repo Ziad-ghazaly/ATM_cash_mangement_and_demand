@@ -14,7 +14,22 @@ Azure-Powered RAG Pipeline for natural language analytics over transactional dat
 Real-time Analytics Dashboard built with Streamlit for operational decision-making
 Multi-Model Architecture enabling model comparison and ensemble strategies
 
-Business Impact:
+
+## System Screenshots
+
+###  Streamlit Dashboard — Demand Forecasting
+![Streamlit Dashboard](screenshots/Screenshot%202025-11-02%20220815.png)
+![Streamlit Dashboard](screenshots/Screenshot%202025-11-02%20220832.png)
+
+### RAG Query Console — Conversational Insights
+![Streamlit Dashboard](screenshots/Screenshot%202025-10-29%20102049.png)
+![Streamlit Dashboard](screenshots/Screenshot%202025-10-29%20102038.png)
+
+
+
+
+
+# Business Impact:
 
  Reduce cash shortage incidents by 85%
  Optimize cash float and reduce idle capital
