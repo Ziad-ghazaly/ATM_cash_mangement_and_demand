@@ -31,7 +31,7 @@ Multi-Model Architecture enabling model comparison and ensemble strategies
 
 # Business Impact:
 
- Reduce cash shortage incidents by 85%
+ Reduce cash shortage incidents &
  Optimize cash float and reduce idle capital
  Enable real-time operational insights through conversational AI
  Data-driven refill planning and risk management
