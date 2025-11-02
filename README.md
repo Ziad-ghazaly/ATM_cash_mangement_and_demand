@@ -38,7 +38,7 @@ Performance Metrics
 Contributing
 
 
- Tech Stack
+Tech Stack
 Machine Learning & Data Science
 ComponentTechnologyPurposeCore MLscikit-learn 1.3+Ridge, Lasso, Random ForestGradient BoostingXGBoost 2.0+, CatBoost 1.2+Advanced tree-based modelsFeature Engineeringpandas 2.1+, numpy 1.24+Time-series feature extractionSerializationjoblib, pickleModel persistence
 Backend & API
@@ -49,24 +49,33 @@ Frontend & Visualization
 ComponentTechnologyPurposeDashboardStreamlit 1.31+Interactive web interfacePlottingPlotly 5.18+Interactive visualizationsStylingCustom CSSProfessional UI/UX
 DevOps & Utilities
 
+
+
+
 Environment: python-dotenv
 Timezone: zoneinfo (Asia/Kuwait)
 Data I/O: openpyxl (Excel support)
 
 
- Installation
+
+
+
+
+# Installation
 Prerequisites
 bashPython 3.11 or higher
 Azure subscription (for cloud services)
 Git
 8GB RAM minimum (16GB recommended for model training)
 Step 1: Clone Repository
-bashgit clone https://github.com/yourusername/ATM_CASH_MANAGEMENT_AND_DEMAND-1.git
+bashgit clone https://github.com/yourusername/ATM_CASH_MANAGEMENT_AND_DEMAND.git
 cd ATM_CASH_MANAGEMENT_AND_DEMAND-1
 Step 2: Create Virtual Environment
 bash# Windows
 python -m venv venv
 venv\Scripts\activate
+
+
 
 # Linux/macOS
 python3 -m venv venv
@@ -75,33 +84,17 @@ Step 3: Install Dependencies
 bash# Install all required packages
 pip install -r requirements.txt
 
-# Verify installation
-python -c "import sklearn, xgboost, catboost, fastapi, streamlit; print(' All packages installed')"
-Step 4: Configure Environment Variables
-Create .env file in project root:
-bash# Azure OpenAI Configuration
-AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_OPENAI_API_KEY=your_api_key_here
-AZURE_OPENAI_API_VERSION=2024-08-01-preview
-AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-4o-mini
-AZURE_OPENAI_EMBED_MODEL=text-embedding-3-large
+
+
 
 # Azure AI Search Configuration
 AZURE_SEARCH_ENDPOINT=https://your-search.search.windows.net
 AZURE_SEARCH_API_KEY=your_search_key_here
-AZURE_SEARCH_INDEX=atm-knowledge
-ATM_DATA_INDEX_V2=atm-data-v2
+AZURE_SEARCH_INDEX=YOUR_Semantic_Search
+ATM_DATA_INDEX_V2=Data_Indexes
 
-# Semantic Configuration Names
-KB_SEMANTIC_CONFIG=kb-semantic
-DATA_SEMANTIC_CONFIG=atm-semantic
 
-# Vector Field Names
-KB_VECTOR_FIELD=content_vector
-DATA_VECTOR_FIELD=content_vector
 
-# Optional: Enable embeddings during indexing (resource-intensive)
-INDEX_WITH_EMBEDDINGS=false
 
 # API Configuration
 RAG_API_URL=http://localhost:8000
@@ -114,13 +107,14 @@ cd services/RAG_API
 python setup_indices.py
 Option B: Manual Setup
 
+
 Create Azure AI Search resource in Azure Portal
 Create two indices: atm-knowledge, atm-data-v2
 Configure semantic ranking for both indices
 Deploy Azure OpenAI models (gpt-4o-mini, text-embedding-3-large)
 
 
- Quick Start
+# Quick Start
 Method 1: Automated Startup (Recommended)
 Windows:
 bash# Start both services simultaneously
