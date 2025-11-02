@@ -76,7 +76,7 @@ bash# Install all required packages
 pip install -r requirements.txt
 
 # Verify installation
-python -c "import sklearn, xgboost, catboost, fastapi, streamlit; print('✅ All packages installed')"
+python -c "import sklearn, xgboost, catboost, fastapi, streamlit; print(' All packages installed')"
 Step 4: Configure Environment Variables
 Create .env file in project root:
 bash# Azure OpenAI Configuration
