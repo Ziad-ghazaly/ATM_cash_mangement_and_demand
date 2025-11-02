@@ -68,7 +68,7 @@ Azure subscription (for cloud services)
 Git
 8GB RAM minimum (16GB recommended for model training)
 Step 1: Clone Repository
-bashgit clone https://github.com/yourusername/ATM_CASH_MANAGEMENT_AND_DEMAND.git
+bashgit clone [https://github.com/yourusername/ATM_CASH_MANAGEMENT_AND_DEMAND](https://github.com/Ziad-ghazaly/ATM_cash_mangement_and_demand/).git
 cd ATM_CASH_MANAGEMENT_AND_DEMAND-1
 Step 2: Create Virtual Environment
 bash# Windows
@@ -194,6 +194,7 @@ python# Temporal Features
 3. DayOfWeek             →  11.2%
 4. Month                 →   8.7%
 5. Location              →   6.3%
+
 2. Model Architecture
 Multi-Model Ensemble (model_loader.py):
 ModelAlgorithmHyperparametersUse CaseRidgeLinear Regression with L2α=1.0Baseline, interpretabilityLassoLinear Regression with L1α=1.0Feature selectionRandomForestEnsemble Treesn_estimators=100, max_depth=20Non-linear patternsXGBoostGradient Boostinglearning_rate=0.1, max_depth=6High accuracyCatBoostGradient Boostingiterations=100, depth=6Categorical handling
