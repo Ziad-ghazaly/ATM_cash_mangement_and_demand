@@ -37,23 +37,8 @@ Multi-Model Architecture enabling model comparison and ensemble strategies
  Data-driven refill planning and risk management
 
 
-# Table of Contents
 
-System Architecture
-Tech Stack
-Installation
-Quick Start
-Project Structure
-ML Pipeline
-RAG System
-API Reference
-Data Science Workflow
-Deployment
-Performance Metrics
-Contributing
-
-
-Tech Stack
+# Tech Stack
 Machine Learning & Data Science
 ComponentTechnologyPurposeCore MLscikit-learn 1.3+Ridge, Lasso, Random ForestGradient BoostingXGBoost 2.0+, CatBoost 1.2+Advanced tree-based modelsFeature Engineeringpandas 2.1+, numpy 1.24+Time-series feature extractionSerializationjoblib, pickleModel persistence
 Backend & API
