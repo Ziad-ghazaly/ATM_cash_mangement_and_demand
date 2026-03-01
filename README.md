@@ -148,11 +148,7 @@ Categorical Encoding
 
 2. Model Architecture
 Multi-Model Ensemble (model_loader.py):
-ModelAlgorithmHyperparametersUse CaseRidgeLinear Regression with L2α=1.0Baseline, interpretabilityLassoLinear Regression with L1α=1.0Feature selectionRandomForestEnsemble Treesn_estimators=100, max_depth=20Non-linear patternsXGBoostGradient Boostinglearning_rate=0.1, max_depth=6High accuracyCatBoostGradient Boostingiterations=100, depth=6Categorical handling
-Model Selection Logic:
-python# Switch between models dynamically
-model.switch_model("XGBoost")  # For accuracy
-model.switch_model("Ridge")    # For interpretability
+
 
 
 4. Training Pipeline
@@ -319,9 +315,7 @@ Response 200:
 
 ---
 
-##  Data Science Workflow
-
-### **1. Exploratory Data Analysis (EDA)**
+### **Exploratory Data Analysis (EDA)**
 
 **In Streamlit Dashboard**:
 - Upload CSV → Auto-generates:
@@ -336,7 +330,7 @@ Response 200:
 - By Year (multi-select)
 - By Metric (Withdrawals/Deposits)
 
-### **2. Model Evaluation**
+### **Model Evaluation**
 
 **Performance Metrics** (example from Random Forest):
 ```
