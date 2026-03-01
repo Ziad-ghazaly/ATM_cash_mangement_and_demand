@@ -131,38 +131,11 @@ bashcd streamlit_app
 streamlit run app.py --server.port 8501
 ```
 
-### **Access Points**
--  **Streamlit Dashboard**: http://localhost:8501
--  **API Documentation**: http://localhost:8000/docs
--  **Health Check**: http://localhost:8000/health
 
----
 
-## 📁 Project Structure
+
+
 ```
-ATM_CASH_MANAGEMENT_AND_DEMAND-1/
-│
-├──  streamlit_app/              # Frontend Application
-│   ├── app.py                     # Main Streamlit interface
-│   ├── rag_client.py              # RAG API client wrapper
-│   ├── app_settings.py            # Frontend configuration
-│   ├── feature_engineering.py     # Feature transformations
-│   ├── model_loader.py            # Multi-model loader utility
-│   └── trained_model/             # Serialized ML models
-│       └── atm_rf_model.pkl       # Multi-model pickle (73.5 MB)
-│
-├── services/RAG_API/           # Backend Services
-│   ├── app.py                     # FastAPI application
-│   ├── tools.py                   # Analytics & prediction tools
-│   ├── setup_indices.py           # Azure Search index setup
-│   └── requirements.txt           # Backend dependencies
-│
-├──  requirements.txt            # Global dependencies
-├──  start_api.bat              # Windows launcher
-├──  start_api.sh               # Unix launcher
-├──  .env                       # Environment config (NOT in repo)
-├──  README.md                  # This file
-└──  .gitignore                 # Git exclusions
 
 ML Pipeline
 1. Feature Engineering
