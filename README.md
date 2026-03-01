@@ -114,28 +114,6 @@ Configure semantic ranking for both indices
 Deploy Azure OpenAI models (gpt-4o-mini, text-embedding-3-large)
 
 
-# Quick Start
-Method 1: Automated Startup (Recommended)
-Windows:
-bash# Start both services simultaneously
-start_api.bat
-Linux/macOS:
-bashchmod +x start_api.sh
-./start_api.sh
-Method 2: Manual Startup
-Terminal 1 - Start RAG API Backend:
-bashcd services/RAG_API
-python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
-Terminal 2 - Start Streamlit Frontend:
-bashcd streamlit_app
-streamlit run app.py --server.port 8501
-```
-
-
-
-
-
-```
 
 ML Pipeline
 1. Feature Engineering
@@ -146,15 +124,15 @@ python# Temporal Features
 - Week_Sin, Week_Cos (cyclic encoding)
 - IsWeekend, IsHoliday
 
-# Lag Features (historical demand)
+Lag Features (historical demand)
 - Withdrawals_Lag1, Withdrawals_Lag7
 - Deposits_Lag1, Deposits_Lag7
 
-# Rolling Statistics (7-day window)
+Rolling Statistics (7-day window)
 - Withdrawals_RollMean7, Withdrawals_RollStd7
 - Deposits_RollMean7, Deposits_RollStd7
 
-# Categorical Encoding
+Categorical Encoding
 - Location (Label Encoded)
 - Weather (Label Encoded)
 - City (Label Encoded)
@@ -175,7 +153,9 @@ Model Selection Logic:
 python# Switch between models dynamically
 model.switch_model("XGBoost")  # For accuracy
 model.switch_model("Ridge")    # For interpretability
-3. Training Pipeline
+
+
+4. Training Pipeline
 bash# Example training workflow (pseudo-code)
 python train_model.py \
   --data data/atm_transactions_2024.csv \
@@ -213,12 +193,10 @@ Response:
 
 ### **Architecture Overview**
 ```
-Intent-Based Tool Routing
-Supported Intents (tools.py):
-IntentTool FunctionExample QueryRisk Assessmentcompute_cashout_risk()"Which ATMs are at risk of running out?"Refill Planningrefill_suggestion()"Calculate optimal refill amounts"Performanceatm_performance_ranking()"Top 10 ATMs by withdrawals?"Predictionpredict_atm_demand()"Predict demand for ATM_001 tomorrow"City Comparisoncity_comparison_report()"Compare ATM performance across cities"Weekend Prepweekend_preparation_report()"Weekend refill recommendations?"Location Analysislocation_optimization_analysis()"Best locations for new ATMs?"
 Search Strategy
 Hybrid Search Pipeline:
-python1. Semantic Search (Azure AI Search)
+
+1. Semantic Search (Azure AI Search)
    - Query understanding via semantic ranking
    - Returns top 30 documents
 
@@ -253,8 +231,7 @@ Typical Context: 2-5K tokens (search results + prompt)
 Max Output: 1200 tokens
 Temperature: 0.1 (deterministic answers)
 
-
-📡 API Reference
+API Reference
 FastAPI Endpoints (services/RAG_API/app.py)
 1. Health Check
 httpGET /health
