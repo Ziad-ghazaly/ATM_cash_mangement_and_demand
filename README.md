@@ -17,7 +17,7 @@ Multi-Model Architecture enabling model comparison and ensemble strategies
 
 ## System Screenshots
 
-###  Streamlit Dashboard — Demand Forecasting
+###  PowerBI Dashboard — Demand Forecasting
 ![Streamlit Dashboard](screenshots/ATM-Dashboard.png)
 
 
